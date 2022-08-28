@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { filteredByInput } from "../../redux/blog/actions";
+import { getSearchInputValue } from "../../redux/filterBlog/action";
 import useDebounce from "../../utils/useDebounce";
 
 export default function SearchBar() {
@@ -13,11 +13,7 @@ export default function SearchBar() {
   // Effect for API call
   useEffect(
     () => {
-      if (debouncedSearchTerm) {
-        setIsSearching(true);
-        dispatch(filteredByInput(searchTerm));
-      }
-      setIsSearching(false);
+      dispatch(getSearchInputValue(searchTerm));
     },
     [debouncedSearchTerm] // Only call effect if debounced search term changes
   );

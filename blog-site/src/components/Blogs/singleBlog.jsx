@@ -1,17 +1,18 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { filteredBlogs } from "../../redux/blog/actions";
-import { addQueryTags } from "../../redux/filterBlog/action";
+import { addAuthor, addCategories } from "../../redux/filterBlog/action";
 
 export default function SingleBlog({ blog }) {
   const dispatch = useDispatch();
   const filteredTags = useSelector((state) => state.filterBlog?.tags);
 
-  const handleAddQuery = (tags) => {
-    const formateTags = tags.replaceAll(" ", "_").toLowerCase();
-    dispatch(addQueryTags(formateTags));
+  // const handleAddQuery = (tags) => {
+  //   const formateTags = tags.replaceAll(" ", "_").toLowerCase();
+  //   dispatch(addQueryTags(formateTags));
+  // };
+  const handleAddAuthor = (author) => {
+    dispatch(addAuthor(author.replaceAll(" ", "_").toLowerCase()));
   };
-
   return (
     <div className="flex flex-col rounded-lg shadow-lg overflow-hidden">
       <div className="flex-shrink-0">
@@ -21,7 +22,13 @@ export default function SingleBlog({ blog }) {
         <div className="flex-1">
           <p className="text-sm font-medium text-indigo-600">
             <span
-              onClick={() => handleAddQuery(blog?.category)}
+              onClick={() =>
+                dispatch(
+                  addCategories(
+                    blog?.category.replaceAll(" ", "_").toLowerCase()
+                  )
+                )
+              }
               className="inline-flex cursor-pointer	 items-center px-3 py-0.5 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800"
             >
               {blog?.category}
@@ -34,7 +41,7 @@ export default function SingleBlog({ blog }) {
         <div className="mt-6 flex items-center">
           <div className="flex-shrink-0">
             <img
-              onClick={() => handleAddQuery(blog?.author?.name)}
+              onClick={() => handleAddAuthor(blog?.author?.name)}
               className="h-10 w-10 rounded-full cursor-pointer"
               src={blog?.author?.image}
               alt=""
@@ -42,7 +49,7 @@ export default function SingleBlog({ blog }) {
           </div>
           <div className="ml-3">
             <p
-              onClick={() => handleAddQuery(blog?.author?.name)}
+              onClick={() => handleAddAuthor(blog?.author?.name)}
               className="text-sm cursor-pointer font-medium text-gray-900 hover:underline"
             >
               {blog?.author?.name}

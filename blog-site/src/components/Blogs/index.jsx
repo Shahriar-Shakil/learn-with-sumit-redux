@@ -1,31 +1,47 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { filteredBlogs } from "../../redux/blog/actions";
-import { removeQueryTags } from "../../redux/filterBlog/action";
+import { removeAuthor, removeCategories } from "../../redux/filterBlog/action";
 import SingleBlog from "./singleBlog";
 export default function Blogs() {
-  const blogs = useSelector((state) => state.blogs);
-  const filteredTags = useSelector((state) => state.filterBlog?.tags);
+  const blogs = useSelector((state) => state.blogs?.blogs);
+  const filteredState = useSelector((state) => state.filterBlog);
   const dispatch = useDispatch();
-  const handleRemoveQuery = (query) => {
-    dispatch(removeQueryTags(query));
-    dispatch(filteredBlogs([]));
+  // const handleRemoveQuery = (query) => {
+  //   dispatch(removeQueryTags(query));
+  //   dispatch(filteredBlogs([]));
+  // };
+
+  const filterSearchHandler = (blog) => {
+    return blog.title.toLowerCase().includes(filteredState.searchKeyword);
   };
-  useEffect(() => {
-    if (filteredTags.length) {
-      dispatch(filteredBlogs(filteredTags));
+  const filteredByAuthor = (blog) => {
+    if (filteredState.author) {
+      return (
+        blog.author.name.replaceAll(" ", "_").toLowerCase() ===
+        filteredState.author
+      );
+    } else {
+      return blog;
     }
-  }, [filteredTags]);
-  let blogPosts;
-  if (blogs?.filteredBlog?.length > 0) {
-    blogPosts = blogs?.filteredBlog?.map((blogPost) => {
-      return <SingleBlog blog={blogPost} />;
-    });
-  } else {
-    blogPosts = blogs.blogs?.map((blog) => {
+  };
+  const filterByCategory = (blog) => {
+    if (filteredState.categories.length) {
+      return filteredState.categories.every((item) =>
+        blog.category.toLowerCase().replaceAll(" ", "_").includes(item)
+      );
+    } else {
+      return blog;
+    }
+  };
+  let blogPosts = [];
+  blogPosts = blogs
+    ?.filter(filterSearchHandler)
+    .filter(filteredByAuthor)
+    .filter(filterByCategory)
+    .map((blog) => {
       return <SingleBlog blog={blog} />;
     });
-  }
+
   return (
     <section className="relative bg-gray-50 pt-8 pb-20 px-4 sm:px-6 lg:pt-16 lg:pb-16 lg:px-8">
       <div className="absolute inset-0">
@@ -43,7 +59,29 @@ export default function Blogs() {
         </div>
         {/* card grid  */}
         <div className="flex">
-          {filteredTags?.map((item) => {
+          {filteredState?.author ? (
+            <span class="bg-blue-100 flex items-center capitalize text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">
+              {filteredState?.author.replaceAll("_", " ")}
+              <svg
+                onClick={() => dispatch(removeAuthor())}
+                className="w-4 h-4 ml-2 hover:text-red-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </span>
+          ) : (
+            <></>
+          )}
+          {filteredState?.categories?.map((item) => {
             return (
               <span
                 id={item}
@@ -51,7 +89,7 @@ export default function Blogs() {
               >
                 {item?.replaceAll("_", " ")}{" "}
                 <svg
-                  onClick={() => handleRemoveQuery(item)}
+                  onClick={() => dispatch(removeCategories(item))}
                   className="w-4 h-4 ml-2 hover:text-red-500"
                   fill="none"
                   stroke="currentColor"
